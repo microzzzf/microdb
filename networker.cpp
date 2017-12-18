@@ -79,8 +79,6 @@ void Networker::Connector::stop()
 	if (thread_)
 	{
 		thread_->join();
-		delete thread_;
-		thread_ = nullptr;
 	}
 }
 
@@ -89,6 +87,12 @@ Networker::Connector::~Connector()
 	if (fd_ > -1)
 	{
 		close(fd_);
+	}
+
+	if (thread_)
+	{
+		delete thread_;
+		thread_ = nullptr;
 	}
 }
 
