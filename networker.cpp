@@ -2,6 +2,11 @@
 
 using namespace microdb;
 
+void reset(int)
+{
+
+}
+
 bool Networker::Listener::init()
 {
 	if ((fd_ = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -32,7 +37,10 @@ bool Networker::Listener::init()
 
 Networker::Listener::~Listener()
 {
-	close(fd_);
+	if (fd_ > -1)
+	{
+		close(fd_);
+	}
 }
 
 void Networker::Connector::work(int listener)
@@ -54,14 +62,11 @@ void Networker::Connector::work(int listener)
 			memset(buffer_, 0, sizeof(buffer_));	
 			memcpy(buffer_, "done\n", 5);
 			send(fd_, buffer_, strlen(buffer_), 0);
+			signal(SIGPIPE, reset);
+			connected_ = false;
 			memset(buffer_, 0, sizeof(buffer_));
 		}
 	}	
-}
-
-void Networker::Connector::reset(int)
-{
-	connected_ = false;
 }
 
 void Networker::Connector::start(int listener)
@@ -69,14 +74,21 @@ void Networker::Connector::start(int listener)
 	thread_ = new std::thread(std::mem_fn(&Networker::Connector::work), this, listener);
 }
 
-Networker::Connector::~Connector()
+void Networker::Connector::stop()
 {
-	close(fd_);
 	if (thread_)
 	{
 		thread_->join();
 		delete thread_;
 		thread_ = nullptr;
+	}
+}
+
+Networker::Connector::~Connector()
+{
+	if (fd_ > -1)
+	{
+		close(fd_);
 	}
 }
 
@@ -138,6 +150,11 @@ bool Networker::work()
 		}
 		connectors_[i]->start(listener_->getFd());
 	}	
+
+	for (auto i = 0; i < connectors_.size(); ++i)
+	{
+		connectors_[i]->stop();
+	}
 
 	return true;
 }

@@ -53,11 +53,11 @@ public:
 		}
 
 		void start(int listener);	
+		void stop();
 
 		virtual ~Connector();
 	private:
 		void work(int listener);
-		void reset(int);
 
 		static const int BUFFERLEN = 4096;
 		char buffer_[BUFFERLEN];
@@ -76,7 +76,7 @@ private:
 	Listener* listener_;
 	std::vector<Connector*> connectors_;
 
-	const int MAXCONNECTORS = 2;
+	const int MAXCONNECTORS = 3;
 };
 
 } // namespace microdb
