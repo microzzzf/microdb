@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <iostream>
 #include <string.h>
 #include <thread>
@@ -19,6 +20,12 @@ namespace microdb
 class Networker
 {
 public:
+	enum MODE
+	{
+		BLOCKING,
+		EPOLL
+	};
+
 	class Listener
 	{
 	public:
@@ -53,11 +60,11 @@ public:
 		}
 
 		void start(int listener);	
+		void stop();
 
 		virtual ~Connector();
 	private:
 		void work(int listener);
-		void reset(int);
 
 		static const int BUFFERLEN = 4096;
 		char buffer_[BUFFERLEN];
@@ -67,16 +74,35 @@ public:
 		bool connected_;
 	};
 
+	class EpollConnector
+	{
+	public:
+		EpollConnector()
+		: fd_(-1)
+		{ }
+
+		void start(int listener);
+
+		virtual ~EpollConnector();
+	private:
+		static const int BUFFERLEN = 4096;
+		int fd_;
+		char buffer_[BUFFERLEN];
+		static const int MAXEVENTS = 20;
+	};
+
 	static Networker* getInstance();
 	bool work();
 private:
-	Networker(int port_in, int backlog_in);
+	Networker(int port_in, int backlog_in, MODE mode_in);
 	virtual ~Networker();
 
 	Listener* listener_;
 	std::vector<Connector*> connectors_;
+	EpollConnector* epoll_connector_;
+	MODE mode_;
 
-	const int MAXCONNECTORS = 2;
+	static const int MAXCONNECTORS = 3;
 };
 
 } // namespace microdb

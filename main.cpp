@@ -8,8 +8,6 @@
 int main()
 {
 	microdb::Networker::getInstance()->work();
-	while (1)
-	{	}
 
 #if skiplist
 	microdb::SkipList<int> skiplist(0);
