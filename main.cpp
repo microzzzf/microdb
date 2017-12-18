@@ -1,9 +1,17 @@
 #include "skiplist.h"
+#include "networker.h"
 #include <sys/time.h>
 #include <thread>
 
+#define skiplist 0
+
 int main()
 {
+	microdb::Networker::getInstance()->work();
+	while (1)
+	{	}
+
+#if skiplist
 	microdb::SkipList<int> skiplist(0);
 	std::thread threads[10000];
 	timeval start, end;
@@ -27,6 +35,6 @@ int main()
 		<<" and total "<<skiplist.debug_counter.inserted_counter + skiplist.debug_counter.not_inserted_counter
 		<<" and in list "<<skiplist.debug_counter.in_list_counter<<std::endl;
 #endif
-
+#endif
 	return 0;
 }
