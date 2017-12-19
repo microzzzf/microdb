@@ -154,10 +154,12 @@ void Networker::EpollConnector::start(int listener)
 				std::cout<<"Epoll receive buffer: "<<buffer_;
 				event.data.fd=sock_fd;
 				event.events=EPOLLOUT|EPOLLET;
+				epoll_ctl(fd_, EPOLL_CTL_MOD, sock_fd, &event);
 			}
 			else if(events[i].events&EPOLLOUT)
 			{
 				sock_fd = events[i].data.fd;
+				memcpy(buffer_, "done\n\0", 6);
                 		write(sock_fd, buffer_, n);
                                 event.data.fd=sock_fd;
                                 event.events=EPOLLIN|EPOLLET;
