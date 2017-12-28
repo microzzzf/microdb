@@ -36,21 +36,21 @@ void DataFormat::deserialize(std::string buffer, int size)
     key_.clear();
     value_.clear();
     int8_t i = 0;
-    for (i = 0; i < 4; ++i)
+    for (i = 0; i < SIZELEN; ++i)
     {
         key_size_str.push_back(buffer[i]);
     }
     int32_t key_size = int32Deserialize(key_size_str);
-    for (i = 4; i < 4 + key_size; ++i)
+    for (i = SIZELEN; i < SIZELEN + key_size; ++i)
     {
         key_.push_back(buffer[i]);
     }
-    for (i = 4 + key_size; i < 8 + key_size; ++i)
+    for (i = SIZELEN + key_size; i < SIZELEN + SIZELEN + key_size; ++i)
     {
         value_size_str.push_back(buffer[i]);
     }
     int32_t value_size = int32Deserialize(value_size_str);
-    for (i = 8 + key_size; i < 8 + key_size + value_size; ++i)
+    for (i = SIZELEN + SIZELEN + key_size; i < SIZELEN + SIZELEN + key_size + value_size; ++i)
     {
         value_.push_back(buffer[i]);
     }
@@ -58,17 +58,16 @@ void DataFormat::deserialize(std::string buffer, int size)
 
 std::string DataFormat::int32Serialize(int32_t input)
 {
-    char size[5];
-    int32_t mask = 0xFF;
+    char size[SIZELEN + 1];
     int8_t i = 0;
     int8_t unit = 0;
-    for (i = 0; i < 4; ++i)
+    for (i = 0; i < SIZELEN; ++i)
     {
-        unit = input & mask;
-        size[i] = (char)(unit + 48);
+        unit = input & MASK;
+        size[i] = (char)(unit + ZEROCHAR);
         input = input >> 8;
     }
-    size[4] = 0;
+    size[SIZELEN] = 0;
     return std::string(size);
 }
 
@@ -79,7 +78,7 @@ int32_t DataFormat::int32Deserialize(std::string input)
     int8_t i = 0;
     for (auto itr = input.begin(); itr != input.end(); ++itr)
     {
-        unit = (int32_t)(*itr) - 48;
+        unit = (int32_t)(*itr) - ZEROCHAR;
         size = size + (unit << (i * 8));
     }
     return size;

@@ -46,6 +46,10 @@ private:
     std::string key_;
     std::string value_; 
     std::string buffer_;
+
+    static const int32_t SIZELEN = 4;
+    static const int8_t MASK = 0XFF;
+    static const int8_t ZEROCHAR = 48;
 };
 
 }
